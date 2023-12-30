@@ -1,0 +1,26 @@
+version: '3.3'
+
+services:
+  db:
+    image: mysql:8.0.29
+    restart: always
+    environment:
+      #MYSQL_DATABASE: 'databaseName'
+      MYSQL_USER: 'mysql'
+      MYSQL_PASSWORD: 'mysql'
+      MYSQL_ROOT_PASSWORD: 'root'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - vol-db:/var/lib/mysql
+    networks:
+      - todolist-network
+
+volumes:
+  vol-db:
+
+networks:
+  todolist-network:
+    driver: bridge
