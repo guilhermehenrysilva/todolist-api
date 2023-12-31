@@ -29,7 +29,7 @@ public class AuthenticationController {
 
     @PostMapping
     public ResponseEntity signIn(@RequestBody @Valid SignInRequest data) {
-        var authenticationToken = new UsernamePasswordAuthenticationToken(data.login(), data.password());
+        var authenticationToken = new UsernamePasswordAuthenticationToken(data.email(), data.password());
         var authentication = manager.authenticate(authenticationToken);
         var tokenJWT = tokenService.generateToken((User) authentication.getPrincipal());
 
