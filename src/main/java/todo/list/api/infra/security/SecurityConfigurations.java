@@ -34,6 +34,7 @@ public class SecurityConfigurations {
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .formLogin(Customizer.withDefaults())
                 .oauth2Login(Customizer.withDefaults());
 
         return http.getOrBuild();

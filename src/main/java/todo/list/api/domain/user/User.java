@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import todo.list.api.domain.annotation.Annotation;
+import todo.list.api.domain.annotation.UpdateAnnotationRequest;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -24,8 +25,10 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(unique = true)
     private String email;
+
     private String password;
 
     private String name;
@@ -70,6 +73,11 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public void update(String name) {
+        if (name != null)
+            this.name = name;
     }
 
 }

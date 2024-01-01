@@ -3,6 +3,7 @@ package todo.list.api.controller;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,6 +14,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import todo.list.api.domain.user.*;
 import todo.list.api.infra.security.TokenJWT;
 import todo.list.api.infra.security.TokenService;
+
+import java.io.IOException;
+import java.util.Base64;
 
 @RestController
 @RequestMapping("/")
@@ -28,13 +32,19 @@ public class AuthenticationController {
     private UserService userService;
 
     @GetMapping
-    public void callback(HttpServletResponse httpResponse) {
-        DefaultOAuth2User oAuth2User = (DefaultOAuth2User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        //todo: verify, save and return user sso
-        //todo: generate token for this user
+    public void callback(HttpServletResponse httpResponse) throws IOException {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String tokenJWT = null;
 
-//        httpResponse.setHeader(HttpHeaders.SET_COOKIE, "user=" + Base64.getEncoder().encodeToString(tokenJWT.getBytes())+"; Max-Age=86400");
-//        httpResponse.sendRedirect(redirectUrl+ "?token=" + TokenJWT(tokenJWT));
+        if (principal instanceof DefaultOAuth2User) {
+            User user = userService.insertOAuth2User((DefaultOAuth2User) principal);
+            tokenJWT = tokenService.generateToken(user);
+        } else {
+            tokenJWT = tokenService.generateToken((User) principal);
+        }
+
+        httpResponse.setHeader(HttpHeaders.SET_COOKIE, "user=" + Base64.getEncoder().encodeToString(tokenJWT.getBytes())+"; Max-Age=86400");
+        httpResponse.sendRedirect("http://localhost:8080/index.html"+ "?token=" + tokenJWT);
     }
 
     @PostMapping("sign-in")
