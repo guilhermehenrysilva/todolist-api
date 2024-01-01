@@ -1,15 +1,28 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Logged</title>
+    <title>Welcome</title>
 </head>
 <body>
+<h1>User logged in successfully!</h1>
 
-<h1>User Logged. Welcome!</h1>
+<h3>TokenJWT: </h3>
+<p id="tokenVar"></p>
 
+<script>
+        // Função para obter parâmetros da URL
+        function obterParametroDaURL(nome) {
+            const urlSearchParams = new URLSearchParams(window.location.search);
+            return urlSearchParams.get(nome);
+        }
+
+        // Obter o valor do parâmetro "token" da URL e decodificar
+        const mensagemCodificada = obterParametroDaURL("token");
+        const mensagemDecodificada = decodeURIComponent(mensagemCodificada);
+
+        // Exibir a mensagem na página
+        document.getElementById("tokenVar").textContent = mensagemDecodificada;
+    </script>
 </body>
 </html>
