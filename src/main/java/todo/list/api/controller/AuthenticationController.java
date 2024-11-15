@@ -50,7 +50,7 @@ public class AuthenticationController {
         }
 
         httpResponse.setHeader(HttpHeaders.SET_COOKIE, "user=" + Base64.getEncoder().encodeToString(tokenJWT.getBytes())+"; Max-Age=86400");
-        httpResponse.sendRedirect("http://localhost:3000/" + "?token=" + tokenJWT);
+        httpResponse.sendRedirect("http://localhost:3000" + "?token=" + tokenJWT);
     }
 
     @PostMapping("sign-in")
