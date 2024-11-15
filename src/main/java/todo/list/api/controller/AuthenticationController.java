@@ -2,6 +2,7 @@ package todo.list.api.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +15,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 import todo.list.api.domain.user.*;
 import todo.list.api.infra.security.TokenJWT;
 import todo.list.api.infra.security.TokenService;
+import todo.list.api.utils.AuthUtils;
 
 import java.io.IOException;
 import java.util.Base64;
 
+@Slf4j
 @RestController
 @RequestMapping("/")
 public class AuthenticationController {
@@ -33,18 +36,21 @@ public class AuthenticationController {
 
     @GetMapping
     public void callback(HttpServletResponse httpResponse) throws IOException {
+        log.info("Callback");
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String tokenJWT = null;
 
         if (principal instanceof DefaultOAuth2User) {
+            log.info("Callback - OAuth2 User");
             User user = userService.insertOAuth2User((DefaultOAuth2User) principal);
             tokenJWT = tokenService.generateToken(user);
         } else {
+            log.info("Callback - Api User");
             tokenJWT = tokenService.generateToken((User) principal);
         }
 
         httpResponse.setHeader(HttpHeaders.SET_COOKIE, "user=" + Base64.getEncoder().encodeToString(tokenJWT.getBytes())+"; Max-Age=86400");
-        httpResponse.sendRedirect("http://localhost:8080/index.html" + "?token=" + tokenJWT);
+        httpResponse.sendRedirect("http://localhost:3000/" + "?token=" + tokenJWT);
     }
 
     @PostMapping("sign-in")
@@ -62,6 +68,12 @@ public class AuthenticationController {
         var uri = uriBuilder.path("/users/{id}").buildAndExpand(user.getId()).toUri();
 
         return ResponseEntity.created(uri).body(new SignUpResponse(user));
+    }
+
+    @GetMapping("me")
+    public ResponseEntity<UserDataResponse> me() {
+        var user = AuthUtils.getLoggedUser();
+        return ResponseEntity.ok(new UserDataResponse(user));
     }
 
 }

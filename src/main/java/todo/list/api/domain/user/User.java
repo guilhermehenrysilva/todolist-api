@@ -37,7 +37,7 @@ public class User implements UserDetails {
     @Column(name = "auth_client_type")
     private AuthenticationClientTypeEnum authClientType;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private Set<Annotation> annotations = new HashSet<>();
 
     @Override
