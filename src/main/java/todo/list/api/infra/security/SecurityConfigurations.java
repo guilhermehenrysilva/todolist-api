@@ -1,5 +1,6 @@
 package todo.list.api.infra.security;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +14,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import todo.list.api.infra.security.filter.SecurityExceptionHandlerFilter;
+import todo.list.api.infra.security.filter.SecurityFilter;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -21,19 +27,29 @@ public class SecurityConfigurations {
     @Autowired
     private SecurityFilter securityFilter;
 
+    @Autowired
+    private SecurityExceptionHandlerFilter securityExceptionHandlerFilter;
+
+    @Getter
+    private final List<AntPathRequestMatcher> allowedRequestMatchers = Arrays.asList(
+            new AntPathRequestMatcher("/"),
+            new AntPathRequestMatcher("/login/**"),
+            new AntPathRequestMatcher("/sign-in"),
+            new AntPathRequestMatcher("/sign-up"),
+            new AntPathRequestMatcher("/v3/api-docs/**"),
+            new AntPathRequestMatcher("/swagger-ui.html"),
+            new AntPathRequestMatcher("/swagger-ui/**")
+    );
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers(
-                        AntPathRequestMatcher.antMatcher("/sign-in"),
-                        AntPathRequestMatcher.antMatcher("/sign-up"),
-                        AntPathRequestMatcher.antMatcher("/v3/api-docs/**"),
-                        AntPathRequestMatcher.antMatcher("/swagger-ui.html"),
-                        AntPathRequestMatcher.antMatcher("/swagger-ui/**")).permitAll()
+                .requestMatchers(allowedRequestMatchers.toArray(new AntPathRequestMatcher[0])).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(securityExceptionHandlerFilter, SecurityFilter.class)
                 .formLogin(Customizer.withDefaults())
                 .oauth2Login(Customizer.withDefaults());
 

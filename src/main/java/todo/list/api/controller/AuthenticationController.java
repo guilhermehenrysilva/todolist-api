@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,7 +14,7 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import todo.list.api.domain.user.*;
-import todo.list.api.infra.security.TokenJWT;
+import todo.list.api.infra.security.TokenResponse;
 import todo.list.api.infra.security.TokenService;
 import todo.list.api.utils.AuthUtils;
 
@@ -34,10 +35,20 @@ public class AuthenticationController {
     @Autowired
     private UserService userService;
 
+    @Value("${api.security.token.exp}")
+    private String tokenExp;
+
     @GetMapping
     public void callback(HttpServletResponse httpResponse) throws IOException {
         log.info("Callback");
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal == null || principal.equals("anonymousUser")) {
+            log.info("Callback - anonymousUser");
+            httpResponse.sendRedirect("/login");
+            return;
+        }
+
         String tokenJWT = null;
 
         if (principal instanceof DefaultOAuth2User) {
@@ -49,17 +60,17 @@ public class AuthenticationController {
             tokenJWT = tokenService.generateToken((User) principal);
         }
 
-        httpResponse.setHeader(HttpHeaders.SET_COOKIE, "user=" + Base64.getEncoder().encodeToString(tokenJWT.getBytes())+"; Max-Age=86400");
-        httpResponse.sendRedirect("http://localhost:3000" + "?token=" + tokenJWT);
+        httpResponse.setHeader(HttpHeaders.SET_COOKIE, "user=" + Base64.getEncoder().encodeToString(tokenJWT.getBytes())+"; Max-Age=" + tokenExp);
+        httpResponse.sendRedirect("http://localhost:3000/sign-in" + "?token=" + tokenJWT);
     }
 
     @PostMapping("sign-in")
-    public ResponseEntity<TokenJWT> signIn(@RequestBody @Valid SignInRequest data) {
+    public ResponseEntity<TokenResponse> signIn(@RequestBody @Valid SignInRequest data) {
         var authenticationToken = new UsernamePasswordAuthenticationToken(data.email(), data.password());
         var authentication = manager.authenticate(authenticationToken);
         var tokenJWT = tokenService.generateToken((User) authentication.getPrincipal());
 
-        return ResponseEntity.ok(new TokenJWT(tokenJWT));
+        return ResponseEntity.ok(new TokenResponse(tokenJWT));
     }
 
     @PostMapping("sign-up")

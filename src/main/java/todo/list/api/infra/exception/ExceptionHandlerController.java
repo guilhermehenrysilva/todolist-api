@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import todo.list.api.domain.exceptions.AlreadyRegisteredUserException;
 
-@RestControllerAdvice
 @Slf4j
+@RestControllerAdvice
 public class ExceptionHandlerController {
 
     @ExceptionHandler(EntityNotFoundException.class)
@@ -52,7 +52,7 @@ public class ExceptionHandlerController {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity handlerErrorForbidden() {
         log.info("[403] Forbidden.");
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Forbidden access");
     }
 
     @ExceptionHandler(Exception.class)
@@ -61,10 +61,14 @@ public class ExceptionHandlerController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " +ex.getLocalizedMessage());
     }
 
-     private record DataValidationError(String field, String message) {
+    private record DataValidationError(String field, String message) {
         public DataValidationError(FieldError error) {
             this(error.getField(), error.getDefaultMessage());
         }
     }
 
 }
+
+
+
+
