@@ -42,7 +42,7 @@ public class AuthenticationController {
     @GetMapping("/")
     public void callback(HttpServletResponse httpResponse, @AuthenticationPrincipal DefaultOAuth2User principal, OAuth2AuthenticationToken authentication) throws IOException {
         if (principal == null || principal.getName().equals("anonymousUser") || authentication == null) {
-            log.info("Callback - anonymousUser - Redirect to /login");
+            log.info("[TodoList] Callback - anonymousUser - Redirect to /login");
             httpResponse.sendRedirect("/login");
             return;
         }
@@ -50,7 +50,7 @@ public class AuthenticationController {
         String tokenJWT;
         String provider = authentication.getAuthorizedClientRegistrationId();
         AuthenticationProviderEnum providerEnum = AuthenticationProviderEnum.getProvider(provider);
-        log.info("Callback - OAuth2 User - {}", providerEnum.name());
+        log.info("[TodoList] Callback - OAuth2 User - {}", providerEnum.name());
 
         User user = userService.insertOAuth2User(principal, providerEnum);
         tokenJWT = tokenService.generateToken(user);
@@ -61,6 +61,7 @@ public class AuthenticationController {
 
     @PostMapping("/sign-in")
     public ResponseEntity<TokenResponse> signIn(@RequestBody @Valid SignInRequest data) {
+        log.info("[TodoList] Sign in");
         var authenticationToken = new UsernamePasswordAuthenticationToken(data.email(), data.password());
         var authentication = manager.authenticate(authenticationToken);
         var tokenJWT = tokenService.generateToken((User) authentication.getPrincipal());
@@ -70,6 +71,7 @@ public class AuthenticationController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<SignUpResponse> signUp(@RequestBody @Valid SignUpRequest data, UriComponentsBuilder uriBuilder) {
+        log.info("[TodoList] Sign Up");
         User user = userService.insertUser(data.email(), data.password(), data.name());
         var uri = uriBuilder.path("/users/{id}").buildAndExpand(user.getId()).toUri();
 
@@ -78,8 +80,8 @@ public class AuthenticationController {
 
     @GetMapping("/me")
     public ResponseEntity<UserDataResponse> me() {
+        log.info("[TodoList] Me");
         var user = AuthUtils.getLoggedUser();
         return ResponseEntity.ok(new UserDataResponse(user));
     }
-
 }

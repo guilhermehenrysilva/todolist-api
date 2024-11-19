@@ -1,5 +1,6 @@
 package todo.list.api.domain.user;
 
+import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -31,6 +32,9 @@ public class User implements UserDetails {
     private String password;
 
     private String name;
+
+    @Column(name = "photo_url")
+    private String photoUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "authentication_provider")
@@ -74,9 +78,10 @@ public class User implements UserDetails {
         return true;
     }
 
-    public void update(String name) {
-        if (name != null)
+    public void update(String name, String photoUrl) {
+        if (StringUtils.isNotBlank(name))
             this.name = name;
+        if (StringUtils.isNotBlank(photoUrl))
+            this.photoUrl = photoUrl;
     }
-
 }
