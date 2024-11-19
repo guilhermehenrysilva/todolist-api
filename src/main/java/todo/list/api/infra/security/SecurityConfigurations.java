@@ -34,6 +34,7 @@ public class SecurityConfigurations {
     private final List<AntPathRequestMatcher> allowedRequestMatchers = Arrays.asList(
             new AntPathRequestMatcher("/"),
             new AntPathRequestMatcher("/login/**"),
+            new AntPathRequestMatcher("/error/**"),
             new AntPathRequestMatcher("/sign-in"),
             new AntPathRequestMatcher("/sign-up"),
             new AntPathRequestMatcher("/v3/api-docs/**"),

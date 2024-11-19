@@ -14,15 +14,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("""
             SELECT CASE WHEN COUNT(u) > 0
-            THEN true 
+            THEN true
             ELSE false
             END
-            FROM User u 
+            FROM User u
             WHERE u.email = :email
             AND
-            u.authClientType <> :authClientType
+            u.authenticationProvider <> :authenticationProvider
             """)
-    boolean existsByEmailAndIsDifferentFromAuthClientType(@Param("email") String email, @Param("authClientType") AuthenticationClientTypeEnum authClientType);
+    boolean existsByEmailAndIsDifferentFromAuthenticationProvider(@Param("email") String email, @Param("authenticationProvider") AuthenticationProviderEnum authenticationProvider);
 
-    Optional<User> findByEmailAndAuthClientType(String email, AuthenticationClientTypeEnum authClientType);
+    Optional<User> findByEmailAndAuthenticationProvider(String email, AuthenticationProviderEnum authenticationProvider);
 }

@@ -6,7 +6,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import todo.list.api.domain.annotation.Annotation;
-import todo.list.api.domain.annotation.UpdateAnnotationRequest;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -34,8 +33,8 @@ public class User implements UserDetails {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "auth_client_type")
-    private AuthenticationClientTypeEnum authClientType;
+    @Column(name = "authentication_provider")
+    private AuthenticationProviderEnum authenticationProvider;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private Set<Annotation> annotations = new HashSet<>();

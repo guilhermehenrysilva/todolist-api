@@ -17,19 +17,19 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public User insertOAuth2User(DefaultOAuth2User defaultOAuth2User) {
+    public User insertOAuth2User(DefaultOAuth2User defaultOAuth2User, AuthenticationProviderEnum providerEnum) {
         String email = defaultOAuth2User.getAttribute("email");
         String name = defaultOAuth2User.getAttribute("name");
 
-        if(repository.existsByEmailAndIsDifferentFromAuthClientType(email, AuthenticationClientTypeEnum.GOOGLE))
+        if(repository.existsByEmailAndIsDifferentFromAuthenticationProvider(email, providerEnum))
             throw new AlreadyRegisteredUserException();
 
-        Optional<User> entity = repository.findByEmailAndAuthClientType(email, AuthenticationClientTypeEnum.GOOGLE);
+        Optional<User> entity = repository.findByEmailAndAuthenticationProvider(email, providerEnum);
         if(entity.isPresent()) {
             entity.get().update(name);
             return repository.save(entity.get());
         } else {
-            User user = this.userBuilder(email, null, name, AuthenticationClientTypeEnum.GOOGLE);
+            User user = this.userBuilder(email, null, name, providerEnum);
             return repository.save(user);
         }
     }
@@ -38,18 +38,17 @@ public class UserService {
         if(repository.existsByEmail(email))
             throw new AlreadyRegisteredUserException();
 
-        User user = this.userBuilder(email, password, name, AuthenticationClientTypeEnum.TODOLIST);
+        User user = this.userBuilder(email, password, name, AuthenticationProviderEnum.TODOLIST);
 
         return repository.save(user);
     }
 
-    private User userBuilder(String email, String password, String name, AuthenticationClientTypeEnum authClientType) {
+    private User userBuilder(String email, String password, String name, AuthenticationProviderEnum authenticationProvider) {
         return User.builder()
                 .email(email)
                 .password(password != null ? passwordEncoder.encode(password) : null)
                 .name(name)
-                .authClientType(authClientType)
+                .authenticationProvider(authenticationProvider)
                 .build();
     }
-
 }
